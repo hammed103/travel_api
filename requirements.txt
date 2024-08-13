@@ -1,2 +1,3 @@
 llamaapi
 pandas
+st-copy-to-clipboard
