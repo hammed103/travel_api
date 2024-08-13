@@ -90,7 +90,36 @@ class TravelAgentPromotionTool:
         return content.strip()
 
 
+    def generate_instagram_captions(self, keywords, caption_type, cta, audience, language):
+        prompt = f"""As an Instagram expert and experienced content writer, 
+        create 3 Instagram captions for a travel agent using these keywords: '{keywords}'.
+        Guidelines:
+        1) Front-Load: Place key info at the beginning.
+        2) Optimize for {cta} Call-to-Action.
+        3) Use no more than four relevant hashtags per caption.
+        4) Use a {caption_type} tone.
+        5) Target the {audience} audience.
+        6) Include emojis for personality.
+        7) Keep captions concise.
+        8) Write in {language}.
+        """
 
+        api_request_json = {
+            "model": "llama-70b-chat",
+            "messages": [
+                {"role": "system", "content": "You are an AI assistant specialized in creating Instagram captions for travel agents."},
+                {"role": "user", "content": prompt}
+            ],
+            "max_tokens": 2000
+        }
+
+        try:
+            response = self.llama.run(api_request_json)
+            captions = response.json()['choices'][0]['message']['content']
+            return captions
+        except Exception as e:
+            st.error(f"An error occurred: {str(e)}")
+            return None
 
 
 def main():
@@ -109,7 +138,7 @@ def main():
         facebook_post_writer(tool)
     elif page == "Prompt Generator For ChatGPT":
         prompt_generator_page()
-    else:
+    elif page == "Instagram Caption Generator":
         instagram_caption_generator(tool)
 
 
@@ -427,16 +456,15 @@ def instagram_caption_generator(tool):
 
                 edited_captions = st.text_area("Edit Your Captions", value=insta_captions, height=300)
                 
-            if st.button("Copy Edited Content to Clipboard"):
-                stc.copy_to_clipboard(edited_captions)
-                st.success("Content copied to clipboard!")
+                if st.button("Copy Edited Content to Clipboard"):
+                    stc.copy_to_clipboard(edited_captions)
+                    st.success("Content copied to clipboard!")
             else:
                 st.error("💥**Failed to generate Instagram Captions. Please try again!**")
 
     if 'saved_insta_captions' in st.session_state:
         st.header("Your Saved Instagram Captions")
         st.write(st.session_state.saved_insta_captions)
-
 
 def profile_based_content(tool):
     st.header("Profile-based Content Generation")
