@@ -14,6 +14,7 @@ from profile_page import profile_page, add_profile_to_sidebar
 from ai_blog_writer import ai_blog_writer
 from fb_post_writer import fb_post_writer
 from insta_caption import instagram_caption_generator_page
+from advanced_postgenerator import advanced_post_generator
 # Setup or get event loop
 def get_or_create_eventloop():
     try:
@@ -225,9 +226,9 @@ def main():
         
         selected = option_menu(
             menu_title=None,
-            options=["Profile", "AI Blog Writer", "FB Post Writer", "Instagram Captions", 
+            options=["Profile", "AI Blog Writer","Advanced Post Generator", "FB Post Writer", "Instagram Captions", 
                      "Proofreader", "Critique Post", "Alternative Words", "Change Tone"],
-            icons=["person", "pencil-square", "facebook", "instagram", 
+            icons=["person", "pencil-square","pencil-square", "facebook", "instagram", 
                    "check-circle", "chat-square-quote", "shuffle", "palette"],
             menu_icon="cast",
             default_index=0,
@@ -251,6 +252,8 @@ def main():
         profile_page()
     elif selected == "AI Blog Writer":
         ai_blog_writer()
+    elif selected == "Advanced Post Generator":
+        advanced_post_generator()
     elif selected == "FB Post Writer":
         fb_post_writer()
     elif selected == "Instagram Captions":
