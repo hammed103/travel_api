@@ -1,3 +1,4 @@
 llamaapi
 pandas
 st-copy-to-clipboard
+streamlit-option-menu

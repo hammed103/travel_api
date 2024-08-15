@@ -4,9 +4,16 @@ import random
 import pandas as pd
 from llamaapi import LlamaAPI
 from st_copy_to_clipboard import st_copy_to_clipboard as stc
-
+from streamlit_option_menu import option_menu
 import asyncio
-
+from proofreader import proofreader_page
+from critique_post import critique_post_page
+from alternative_words import alternative_words_page
+from change_tone_style import change_tone_style_page
+from profile_page import profile_page, add_profile_to_sidebar
+from ai_blog_writer import ai_blog_writer
+from fb_post_writer import fb_post_writer
+from insta_caption import instagram_caption_generator_page
 # Setup or get event loop
 def get_or_create_eventloop():
     try:
@@ -122,25 +129,140 @@ class TravelAgentPromotionTool:
             return None
 
 
+
+
+
 def main():
-    st.set_page_config(page_title="Travel Agent Promotion Tool", page_icon="✈️", layout="wide")
+    st.set_page_config(page_title="InteleTravel Promotion Tool", page_icon="✈️", layout="wide")
     tool = TravelAgentPromotionTool()
 
-    st.title("✈️ AI-Powered Travel Agent Promotion Tool")
+    # Custom CSS for InteleTravel theme with taller navbar
+    st.markdown("""
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;600&display=swap');
+    
+    html, body, [class*="css"] {
+        font-family: 'Work Sans', sans-serif;
+    }
+    
+    .stApp {
+        background-color: white;
+    }
+    
+    .stSidebar {
+        background-color: #d50032;
+        padding: 2rem;
+    }
+    
+    .stSidebar .stSidebarNav {
+        background-color: #d50032;
+    }
+    
+    /* Adjustments for taller navbar */
+    .stSidebar .stSidebarNav > ul {
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+    }
+    
+    .stSidebar .stSidebarNav > ul > li {
+        margin-bottom: 0.5rem;
+    }
+    
+    h1, h2, h3, h4, h5, h6 {
+        font-weight: 600;
+        line-height: 1.2;
+    }
+    
+    h1 {
+        font-size: 3.5rem;
+    }
+    
+    h2 {
+        font-size: 2.35rem;
+    }
+    
+    h3 {
+        font-size: 1.875rem;
+    }
+    
+    h4 {
+        font-size: 1.5rem;
+    }
+    
+    h5 {
+        font-size: 1.25rem;
+    }
+    
+    h6 {
+        font-size: 1rem;
+    }
+    
+    .stButton>button {
+        background-color: #3d4ed7;
+        color: white;
+        font-weight: 600;
+    }
+    
+    .stButton>button:hover {
+        background-color: #1e255d;
+    }
+    
+    a {
+        color: #3d4ed7;
+        font-weight: 600;
+    }
+    
+    a:hover {
+        color: #1e255d;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
-    page = st.sidebar.selectbox("Choose a page", ["Profile-based Content", "Summary-based Content", "AI FB Post Writer", "Instagram Caption Generator"])
+    # Sidebar
+    with st.sidebar:
+        st.image("https://info.inteletravel.com/hubfs/InT_StyleGuide_LogoHeader.svg", width=200)  # Replace with actual logo path
+        st.title("InteleTravel ")
+        
+        selected = option_menu(
+            menu_title=None,
+            options=["Profile", "AI Blog Writer", "FB Post Writer", "Instagram Captions", 
+                     "Proofreader", "Critique Post", "Alternative Words", "Change Tone"],
+            icons=["person", "pencil-square", "facebook", "instagram", 
+                   "check-circle", "chat-square-quote", "shuffle", "palette"],
+            menu_icon="cast",
+            default_index=0,
+            styles={
+                "container": {"padding": "0!important", "background-color": "#d50032"},
+                "icon": {"color": "white", "font-size": "16px"},  # Slightly larger icon
+                "nav-link": {
+                    "font-size": "16px",  # Slightly larger font
+                    "text-align": "left", 
+                    "margin": "0px", 
+                    "--hover-color": "#1e255d",
+                    "color": "white",
+                    "padding": "0.75rem 1rem",  # Increased padding for taller navbar items
+                },
+                "nav-link-selected": {"background-color": "#1e255d"},
+            }
+        )
 
-    if page == "Profile-based Content":
-        profile_based_content(tool)
-    elif page == "Summary-based Content":
-        summary_based_content(tool)
-    elif page == "AI FB Post Writer":
-        facebook_post_writer(tool)
-    elif page == "Prompt Generator For ChatGPT":
-        prompt_generator_page()
-    elif page == "Instagram Caption Generator":
-        instagram_caption_generator(tool)
-
+    # Page content based on selection
+    if selected == "Profile":
+        profile_page()
+    elif selected == "AI Blog Writer":
+        ai_blog_writer()
+    elif selected == "FB Post Writer":
+        fb_post_writer()
+    elif selected == "Instagram Captions":
+        instagram_caption_generator_page(tool)
+    elif selected == "Proofreader":
+        proofreader_page()
+    elif selected == "Critique Post":
+        critique_post_page()
+    elif selected == "Alternative Words":
+        alternative_words_page()
+    elif selected == "Change Tone":
+        change_tone_style_page()
 
 
 def generate_prompt(summary, platform):
@@ -170,402 +292,8 @@ def prompt_generator_page():
 
 
 
-def summary_based_content(tool):
-    def sidebar_configuration():
-        st.sidebar.title("🛠️ Content Personalization")
-
-        # Sidebar expands by default
-        with st.sidebar.expander("**✈️ Travel Content Settings**", expanded=True):
-
-            # "Your Name" input
-            agent_name = st.text_input("Your Name", help="Enter your name as the travel agent.")
-
-            # Years of Experience input
-            experience_years = st.number_input("Years of Experience", min_value=0, max_value=50, help="Enter the number of years you've been in the travel industry.")
-
-            # Specialties input
-            specialties = st.text_area("Specialties", help="List your specialties, such as adventure travel, luxury trips, family vacations, etc. (comma-separated).")
-
-            # Achievements input
-            achievements = st.text_area("Achievements", help="Highlight any key achievements, such as awards, recognitions, or milestones (comma-separated).")
-
-            # Content Length Range
-            length_range_options = ["<100", "100 - 200", "200 - 450", "450 - 800", "800 - 1000"]
-            length_range = st.selectbox("Content Length Range", options=length_range_options, help="Select the length range for the content you want to generate.")
-
-            # Content Tone Options
-            content_tone_options = ["Casual", "Professional", "Inspirational", "Informative", "Adventurous", "Luxury", "Budget-friendly", "Family-oriented", "Customize"]
-            content_tone = st.selectbox("Content Tone", options=content_tone_options, help="Choose the tone of your travel content.")
-            if content_tone == "Customize":
-                custom_tone = st.text_input("Enter custom tone", help="Specify a custom tone for your content.")
-                if custom_tone:
-                    content_tone = custom_tone
-                else:
-                    st.warning("Please specify a custom tone for your content.")
-
-            # Target Audience Options
-            target_audience_options = ["General Travelers", "Luxury Travelers", "Budget Backpackers", "Family Vacationers", "Adventure Seekers", "Business Travelers", "Honeymooners", "Senior Travelers", "Gen-Z Explorers", "Customize"]
-            target_audience = st.selectbox("Target Audience", options=target_audience_options, help="Choose your target audience.")
-            if target_audience == "Customize":
-                custom_audience = st.text_input("Enter custom target audience", help="Specify your custom target audience.", placeholder="E.g., Eco-conscious travelers, Solo female travelers, etc.")
-                if custom_audience:
-                    target_audience = custom_audience
-                else:
-                    st.warning("Please specify your custom target audience.")
-
-            # Content Type Options
-            content_type_options = ["Destination Guide", "Travel Tips", "Itinerary", "Travel Story", "Hotel Review", "Local Cuisine", "Cultural Insights", "Adventure Activity", "Travel News", "Promotional Offer"]
-            content_type = st.selectbox("Content Type", options=content_type_options, help="Choose the type of travel content.")
-
-            # Content Focus Options
-            content_focus_options = ["Beach Getaways", "City Breaks", "Mountain Retreats", "Cultural Experiences", "Adventure Tours", "Luxury Escapes", "Budget Travel", "Eco-Tourism", "Food Tourism", "Historical Sites", "Customize"]
-            content_focus = st.selectbox("Content Focus", options=content_focus_options, help="Choose the focus of your travel content.")
-            if content_focus == "Customize":
-                custom_focus = st.text_input("Enter custom content focus", help="Specify a custom focus for your content.")
-                if custom_focus:
-                    content_focus = custom_focus
-                else:
-                    st.warning("Please specify a custom focus for your content.")
-
-            # Content Language
-            content_language = st.selectbox("Content Language", options=["English", "Spanish", "French", "German", "Italian", "Chinese", "Japanese", "Arabic", "Russian", "Portuguese", "Customize"], help="Choose the language of the content.")
-            if content_language == "Customize":
-                custom_lang = st.text_input("Enter custom language", help="Specify the content language.")
-                if custom_lang:
-                    content_language = custom_lang
-                else:
-                    st.warning("Please specify the language of your content.")
-
-        return {
-            "agent_name": agent_name,
-            "experience_years": experience_years,
-            "specialties": specialties,
-            "achievements": achievements,
-            "length_range": length_range,
-            "content_tone": content_tone,
-            "target_audience": target_audience,
-            "content_type": content_type,
-            "content_focus": content_focus,
-            "content_language": content_language
-        }
 
 
-    st.header("Summary-based Content Generation")
-    st.markdown("Enter a summary about yourself as a travel agent, and we'll generate content based on it!")
-
-    summary = st.text_area("Enter your summary:", height=200)
-    content_type = st.selectbox(
-        "Select Content Type to Generate", 
-        ["Social Media Post", "Blog Post", "Promotional Offer", "Website Bio"]
-    )
-
-    settings = sidebar_configuration()
-
-    if st.button("Generate Content"):
-        if summary:
-            with st.spinner("Generating content..."):
-                agent_info = tool.extract_info(summary)
-                content_settings = {
-                    "length_range": settings['length_range'],
-                    "tone": settings['content_tone'],
-                    "focus": settings['content_focus'],
-                    "language": settings['content_language']
-                }
-                generated_content = tool.generate_content(agent_info, content_type, content_settings)
-            
-            if generated_content:
-                st.subheader("Generated Content")
-                st.write(generated_content)
-
-                edited_content = st.text_area("Edit Your Content", value=generated_content, height=300)
-
-                if st.button("Copy Edited Content to Clipboard"):
-                    stc.copy_to_clipboard(edited_content)
-                    st.success("Content copied to clipboard!")
-        else:
-            st.warning("Please enter a summary before generating content.")
-
-    if 'saved_content' in st.session_state:
-        st.header("Your Saved Content")
-        st.write(st.session_state.saved_content)
-
-
-
-def facebook_post_writer(tool):
-    st.title("📱 AI FB Post Writer for Travel Agents")
-    st.markdown(
-        """
-        This Facebook Post Generator will help you create a compelling Facebook post for your travel agency.
-        Please provide the following details to generate your post:
-        """
-    )
-    
-    col1, col2 = st.columns(2)
-    with col1:
-        post_goal_options = ["Promote a travel package", "Share travel tips", "Increase engagement", "Showcase a destination", "Customize"]
-        post_goal = st.selectbox(
-            "🎯 **What is the goal of your post?**",
-            post_goal_options,
-            index=2,
-            help="Select the main goal of your post."
-        )
-        if post_goal == "Customize":
-            post_goal = st.text_input(
-                "🎯 **Customize your goal:**",
-                placeholder="e.g., Announce a travel event",
-                help="Provide a specific goal if you selected 'Customize'."
-            )
-        target_audience = st.text_input(
-            "👥 **Describe your target audience:**",
-            placeholder="e.g., Adventure seekers, Luxury travelers",
-            help="Describe the audience you are targeting with this post."
-        )
-        include = st.text_input(
-            "📷 **What elements do you want to include?**",
-            placeholder="e.g., Travel package details, Destination highlights",
-            help="Specify any elements you want to include in the post (e.g., videos, links, hashtags, questions)."
-        )
-    with col2:
-        post_tone_options = ["Informative", "Exciting", "Inspirational", "Luxurious", "Adventurous", "Customize"]
-        post_tone = st.selectbox(
-            "🎨 **What tone do you want to use?**",
-            post_tone_options,
-            index=2,
-            help="Choose the tone you want to use for the post."
-        )
-        if post_tone == "Customize":
-            post_tone = st.text_input(
-                "🎨 **Customize your tone:**",
-                placeholder="e.g., Family-friendly",
-                help="Provide a specific tone if you selected 'Customize'."
-            )
-        travel_agency_name = st.text_input(
-            "🏢 **What is your travel agency name?**",
-            placeholder="e.g., Wanderlust Adventures",
-            help="Provide the name of your travel agency. This will be used in the post."
-        )
-        avoid = st.text_input(
-            "❌ **What elements do you want to avoid?**",
-            placeholder="e.g., Overly promotional language, Complex itineraries",
-            help="Specify any elements you want to avoid in the post."
-        )
-
-    if st.button("🚀 Generate Facebook Post"):
-        if not travel_agency_name or not target_audience:
-            st.error("🚫 Please provide the required inputs: Travel Agency Name and Target Audience.")
-        else:
-            with st.spinner("Generating your Facebook post..."):
-                generated_post = tool.generate_content(
-                    {
-                        "name": travel_agency_name,
-                        "target_audience": target_audience,
-                        "post_goal": post_goal,
-                        "include": include,
-                        "avoid": avoid
-                    },
-                    "Facebook Post",
-                    {
-                        "length_range": "between 100 and 200",
-                        "tone": post_tone,
-                        "focus": post_goal,
-                        "language": "English"
-                    }
-                )
-            
-            if generated_post:
-                st.subheader("**🧕 Verify: AI can make mistakes. Please review and edit as needed.**")
-                st.write("## 📄 Generated Facebook Post:")
-                st.write(generated_post)
-                
-                edited_post = st.text_area("Edit Your Post", value=generated_post, height=300)
-                
-
-                if st.button("Copy to Clipboard"):
-                    stc.copy_to_clipboard(edited_post)
-                    st.success("Content copied to clipboard!")
-            else:
-                st.error("Error: Failed to generate Facebook Post.")
-
-    if 'saved_fb_post' in st.session_state:
-        st.header("Your Saved Facebook Post")
-        st.write(st.session_state.saved_fb_post)
-
-
-
-def instagram_caption_generator(tool):
-    st.title("📸 Instagram Caption Generator for Travel Agents")
-    st.markdown(
-        """
-        Generate engaging Instagram captions for your travel agency posts.
-        Provide the following details to create your captions:
-        """
-    )
-
-    col1, col2 = st.columns(2)
-    with col1:
-        input_insta_keywords = st.text_area(
-            "📝 Keywords",
-            placeholder="e.g., Bali, beach vacation, luxury resort",
-            help="Enter keywords related to your Instagram post"
-        )
-        input_insta_type = st.selectbox(
-            "🎨 Caption Tone",
-            ["Inspirational", "Informative", "Humorous", "Adventurous", "Luxurious", "Casual", "Customize"],
-            help="Select the tone for your captions"
-        )
-        if input_insta_type == "Customize":
-            input_insta_type = st.text_input("Custom Tone", placeholder="e.g., Eco-friendly")
-
-    with col2:
-        input_insta_cta = st.selectbox(
-            "🎯 Call-to-Action (CTA)",
-            ["Book Now", "Learn More", "Visit Our Website", "Contact Us", "Share Your Experience", "Customize"],
-            help="Choose the primary action you want your audience to take"
-        )
-        if input_insta_cta == "Customize":
-            input_insta_cta = st.text_input("Custom CTA", placeholder="e.g., Join Our Travel Club")
-
-        input_insta_audience = st.text_input(
-            "👥 Target Audience",
-            placeholder="e.g., Young adventurers, Luxury travelers, Family vacationers",
-            help="Describe your target audience for this post"
-        )
-        input_insta_language = st.selectbox(
-            "🌐 Language",
-            ["English", "Spanish", "French", "German", "Italian", "Customize"],
-            help="Select the language for your captions"
-        )
-        if input_insta_language == "Customize":
-            input_insta_language = st.text_input("Custom Language", placeholder="e.g., Portuguese")
-
-    if st.button('**Get Instagram Captions**'):
-        if not input_insta_keywords:
-            st.error('** 🫣 Please provide keywords to generate Instagram captions. Keywords are required!**')
-        else:
-            with st.spinner("Generating Instagram captions..."):
-                insta_captions = tool.generate_instagram_captions(
-                    input_insta_keywords,
-                    input_insta_type,
-                    input_insta_cta,
-                    input_insta_audience,
-                    input_insta_language
-                )
-            if insta_captions:
-                st.subheader('**👩👩🔬 Go Viral with these Instagram captions! 🎆🎇 🎇**')
-                st.code(insta_captions)
-
-                edited_captions = st.text_area("Edit Your Captions", value=insta_captions, height=300)
-                
-                if st.button("Copy Edited Content to Clipboard"):
-                    stc.copy_to_clipboard(edited_captions)
-                    st.success("Content copied to clipboard!")
-            else:
-                st.error("💥**Failed to generate Instagram Captions. Please try again!**")
-
-    if 'saved_insta_captions' in st.session_state:
-        st.header("Your Saved Instagram Captions")
-        st.write(st.session_state.saved_insta_captions)
-
-def profile_based_content(tool):
-    st.header("Profile-based Content Generation")
-    st.markdown("Create engaging content to promote your travel agency!")
-
-    # Sidebar configuration
-    st.sidebar.header("Your Profile")
-    agent_name = st.sidebar.text_input("Your Name", placeholder="e.g., John Smith", help="Enter your name as the travel agent.")
-    experience_years = st.sidebar.number_input("Years of Experience", min_value=0, max_value=50, help="Enter the number of years you've been in the travel industry.")
-    specialties = st.sidebar.text_area("Specialties", placeholder="e.g., Adventure travel, Luxury trips, Family vacations", help="List your specialties (comma-separated).")
-    achievements = st.sidebar.text_area("Achievements", placeholder="e.g., Top Travel Agent 2023, 1000+ satisfied clients", help="Highlight any key achievements (comma-separated).")
-
-    # Main content area
-    col1, col2 = st.columns(2)
-    with col1:
-        content_type_options = ["Destination Guide", "Travel Tips", "Itinerary", "Travel Story", "Hotel Review", "Local Cuisine", "Cultural Insights", "Adventure Activity", "Travel News", "Promotional Offer"]
-        content_type = st.selectbox("Content Type", options=content_type_options, help="Choose the type of travel content.")
-
-        length_range_options = {"<100": "less than 100", "100 - 200": "between 100 and 200", "200 - 450": "between 200 and 450", "450 - 800": "between 450 and 800", "800 - 1000": "between 800 and 1000"}
-        content_length_range = st.selectbox("Content Length Range", options=list(length_range_options.keys()), help="Select the length range for the content you want to generate.")
-
-        content_tone_options = ["Casual", "Professional", "Inspirational", "Informative", "Adventurous", "Luxury", "Budget-friendly", "Family-oriented", "Customize"]
-        content_tone = st.selectbox("Content Tone", options=content_tone_options, help="Choose the tone of your travel content.")
-        if content_tone == "Customize":
-            content_tone = st.text_input("Custom Tone", placeholder="e.g., Eco-friendly", help="Specify a custom tone for your content.")
-
-    with col2:
-        target_audience = st.text_input("Target Audience", placeholder="e.g., Adventure seekers, Luxury travelers, Families", help="Describe your target audience.")
-
-        content_focus = st.text_input("Content Focus", placeholder="e.g., Beach getaways, Cultural experiences, Food tourism", help="Specify the focus of your content.")
-
-        content_language = st.selectbox("Content Language", options=["English", "Spanish", "French", "German", "Italian", "Chinese", "Japanese", "Arabic", "Russian", "Portuguese", "Customize"], help="Choose the language of the content.")
-        if content_language == "Customize":
-            content_language = st.text_input("Custom Language", placeholder="e.g., Dutch", help="Specify the content language.")
-
-    if st.button("Generate Content"):
-        if not agent_name or not target_audience:
-            st.error("🚫 Please provide the required inputs: Your Name and Target Audience.")
-        else:
-            with st.spinner("Generating your content..."):
-                agent_info = {
-                    "name": agent_name,
-                    "experience": experience_years,
-                    "specialties": specialties.split(','),
-                    "achievements": achievements.split(','),
-                    "target_audience": target_audience,
-                }
-
-                content_settings = {
-                    "length_range": length_range_options[content_length_range],
-                    "tone": content_tone,
-                    "focus": content_focus,
-                    "language": content_language
-                }
-
-                generated_content = tool.generate_content(agent_info, content_type, content_settings)
-            
-            if generated_content:
-                st.subheader("Generated Content")
-                st.write(generated_content)
-
-                edited_content = st.text_area("Edit Your Content", value=generated_content, height=300)
-
-            if st.button("Copy Edited Content to Clipboard"):
-                stc.copy_to_clipboard(edited_content)
-                st.success("Content copied to clipboard!")
-
-    if 'saved_content' in st.session_state:
-        st.header("Your Saved Content")
-        st.write(st.session_state.saved_content)
-
-    st.header("Additional Tools")
-    col1, col2 = st.columns(2)
-
-    with col1:
-        st.subheader("Content Calendar")
-        if st.button("Generate Content Calendar"):
-            calendar = generate_content_calendar()
-            st.write(calendar)
-
-    with col2:
-        st.subheader("Hashtag Generator")
-        if st.button("Generate Hashtags"):
-            hashtags = generate_hashtags()
-            st.write(" ".join(hashtags))
-
-
-
-
-def generate_content_calendar():
-    content_types = ["Social Media Post", "Blog Post", "Promotional Offer"]
-    calendar = {}
-    for i in range(7):
-        day = (pd.Timestamp.now() + pd.Timedelta(days=i)).strftime("%A")
-        calendar[day] = random.choice(content_types)
-    return calendar
-
-def generate_hashtags():
-    travel_hashtags = ["#TravelAgent", "#Wanderlust", "#TravelTips", "#VacationPlanning", 
-                       "#LuxuryTravel", "#AdventureAwaits", "#ExploreTheWorld", "#DreamDestinations"]
-    return random.sample(travel_hashtags, 5)
 
 if __name__ == "__main__":
     main()
