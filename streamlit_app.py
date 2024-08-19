@@ -15,6 +15,7 @@ from ai_blog_writer import ai_blog_writer
 from fb_post_writer import fb_post_writer
 from insta_caption import instagram_caption_generator_page
 from advanced_postgenerator import advanced_post_generator
+from prompt_generator import prompt_generator
 # Setup or get event loop
 def get_or_create_eventloop():
     try:
@@ -227,9 +228,9 @@ def main():
         selected = option_menu(
             menu_title=None,
             options=["Profile", "AI Blog Writer","Advanced Post Generator", "FB Post Writer", "Instagram Captions", 
-                     "Proofreader", "Critique Post", "Alternative Words", "Change Tone"],
+                     "Proofreader", "Critique Post", "Alternative Words", "Change Tone","Prompt Generator"],
             icons=["person", "pencil-square","pencil-square", "facebook", "instagram", 
-                   "check-circle", "chat-square-quote", "shuffle", "palette"],
+                   "check-circle", "chat-square-quote", "shuffle", "palette","light-bulb"],
             menu_icon="cast",
             default_index=0,
             styles={
@@ -266,6 +267,8 @@ def main():
         alternative_words_page()
     elif selected == "Change Tone":
         change_tone_style_page()
+    elif selected == "Prompt Generator" :
+        prompt_generator()
 
 
 def generate_prompt(summary, platform):
