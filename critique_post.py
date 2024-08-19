@@ -40,6 +40,8 @@ def critique_post_page():
                 if result:
                     st.subheader("Post Critique")
                     st.write(result)
+                    edited_post = st.text_area("Edit Content", value=result, height=300)
+                    #
         else:
             st.warning("Please enter a post to critique.")
 

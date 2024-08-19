@@ -40,6 +40,7 @@ def alternative_words_page():
                 if result:
                     st.subheader("Alternative Suggestions")
                     st.write(result)
+                    edited_post = st.text_area("Edit Content", value=result, height=300)
         else:
             st.warning("Please enter both a word and its context.")
 

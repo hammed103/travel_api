@@ -61,8 +61,9 @@ def change_tone_style_page():
     if st.session_state.rewritten_text:
         st.subheader("Rewritten Text")
         st.write(st.session_state.rewritten_text)
+        edited_post = st.text_area("Edit Content", value=st.session_state.rewritten_text, height=300)
         if st.button("Copy Rewritten Text"):
-            st_copy_to_clipboard(st.session_state.rewritten_text)
+            st_copy_to_clipboard(edited_post)
             st.success("Rewritten text copied to clipboard!")
 
 if __name__ == "__main__":

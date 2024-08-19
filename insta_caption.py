@@ -79,7 +79,7 @@ def instagram_caption_generator_page(tool):
             help="Describe your target audience for this post"
         )
         input_insta_language = st.selectbox(
-            "🌐 Language",
+            "🌐 National Flair",
             ["English", "Spanish", "French", "German", "Italian", "Customize"],
             help="Select the language for your captions"
         )

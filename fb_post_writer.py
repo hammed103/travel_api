@@ -162,7 +162,7 @@ def fb_post_writer():
     # Display generated post and handle regeneration
     if 'current_post' in st.session_state:
         st.subheader("Generated Facebook Post")
-        st.markdown(f"```{st.session_state.current_post}```")
+        #st.markdown(f"```{st.session_state.current_post}```")
         
         edited_post = st.text_area("Edit Your Post", value=st.session_state.current_post, height=300)
         

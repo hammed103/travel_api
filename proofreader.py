@@ -38,7 +38,9 @@ def proofreader_page():
                 result = proofreader.proofread(text_to_proofread)
                 if result:
                     st.subheader("Proofreading Results")
+                    
                     st.write(result)
+                    edited_post = st.text_area("Edit Post", value=result, height=300)
                     if st.button("Copy Edited Text"):
                         st_copy_to_clipboard(result)
         else:

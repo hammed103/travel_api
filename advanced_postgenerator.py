@@ -90,7 +90,7 @@ def advanced_post_generator():
     
     col1, col2 = st.columns(2)
     with col1:
-        language = st.selectbox("Language", ["English", "Spanish", "French", "German", "Italian", "Portuguese", "Japanese", "Chinese (Simplified)"])
+        language = st.selectbox("National Flair", ["English", "Spanish", "French", "German", "Italian", "Portuguese", "Japanese", "Chinese (Simplified)"])
         tone = st.selectbox("Post Tone", ["Informative", "Inspirational", "Humorous", "Professional", "Casual & Friendly", "Luxurious & Sophisticated", "Adventurous & Exciting", "Nostalgic & Heartwarming"])
     with col2:
         post_length = st.select_slider("Post Length (characters)", options=[50, 100, 150, 200, 250, 280, 300, 350, 400, 450, 500, 800], value=300)
