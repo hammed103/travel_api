@@ -141,7 +141,7 @@ def homepage():
     col1, col2 = st.columns(2)
 
     with col1:
-        st.markdown("## Why Choose Social Media Companion?")
+        st.markdown("### Why Choose Social Media Companion?")
         
         st.markdown("""
         <div class="feature-card">
@@ -172,7 +172,7 @@ def homepage():
         """, unsafe_allow_html=True)
 
     with col2:
-        st.markdown("## Key Features")
+        st.markdown("### Key Features")
         
         st.markdown("""
         <div class="feature-card">
@@ -212,8 +212,6 @@ def homepage():
     if st.button("Get Started Now"):
         st.success("Welcome aboard! Let's create some amazing content together.")
 
-
-
 def main():
     st.set_page_config(page_title="InteleTravel Promotion Tool", page_icon="✈️", layout="wide")
     tool = TravelAgentPromotionTool()
@@ -250,21 +248,22 @@ def main():
         margin-bottom: 0.5rem;
     }
     
-    h1, h2, h3, h4, h5, h6 {
+    h1 {
+        font-size: 36px;
         font-weight: 600;
         line-height: 1.2;
     }
     
-    h1 {
-        font-size: 3.5rem;
-    }
-    
     h2 {
-        font-size: 2.35rem;
+        font-size: 28px;
+        font-weight: 600;
+        line-height: 1.2;
     }
     
     h3 {
-        font-size: 1.875rem;
+        font-size: 22px;
+        font-weight: 600;
+        line-height: 1.2;
     }
     
     h4 {
@@ -312,6 +311,11 @@ def main():
         color: black;
         font-size: 20px;
     }
+
+    /* Custom style to move subtitle up */
+    .stApp > header + div > div > div > div:nth-child(2) {
+        margin-top: -1rem;
+    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -323,9 +327,9 @@ def main():
         selected = option_menu(
             menu_title=None,
             options=["Home", "Profile", "AI Blog Writer", "Advanced Post Generator", "FB Post Writer", "Instagram Captions", 
-                     "Proofreader", "Critique Post", "Alternative Words", "Change Tone", ],
+                     "Proofreader", "Critique Post", "Alternative Words", "Change Tone", "Prompt Generator"],
             icons=["house", "person", "pencil-square", "pencil-square", "facebook", "instagram", 
-                   "check-circle", "chat-square-quote", "shuffle", "palette", ],
+                   "check-circle", "chat-square-quote", "shuffle", "palette", "light-bulb"],
             menu_icon="cast",
             default_index=0,
             styles={
@@ -364,6 +368,7 @@ def main():
         alternative_words_page()
     elif selected == "Change Tone":
         change_tone_style_page()
+
 
 
 
