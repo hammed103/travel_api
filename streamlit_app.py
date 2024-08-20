@@ -327,7 +327,7 @@ def main():
         selected = option_menu(
             menu_title=None,
             options=["Home", "Profile", "AI Blog Writer", "Advanced Post Generator", "FB Post Writer", "Instagram Captions", 
-                     "Proofreader", "Critique Post", "Alternative Words", "Change Tone", "Prompt Generator"],
+                     "Proofreader", "Critique Post", "Alternative Words", "Change Tone",],
             icons=["house", "person", "pencil-square", "pencil-square", "facebook", "instagram", 
                    "check-circle", "chat-square-quote", "shuffle", "palette", "light-bulb"],
             menu_icon="cast",
