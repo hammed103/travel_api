@@ -212,6 +212,7 @@ def homepage():
     if st.button("Get Started Now"):
         st.success("Welcome aboard! Let's create some amazing content together.")
 
+
 def main():
     st.set_page_config(page_title="InteleTravel Promotion Tool", page_icon="✈️", layout="wide")
     tool = TravelAgentPromotionTool()
@@ -228,7 +229,10 @@ def main():
     .stApp {
         background-color: white;
     }
-    
+    /* Hide Streamlit Branding */
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
     .stSidebar {
         background-color: #d50032;
         padding: 2rem;
@@ -316,6 +320,12 @@ def main():
     .stApp > header + div > div > div > div:nth-child(2) {
         margin-top: -1rem;
     }
+
+    /* Sidebar menu item styles */
+    .nav-link {
+        font-size: 20px !important;
+        font-weight: 600 !important;
+    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -327,21 +337,22 @@ def main():
         selected = option_menu(
             menu_title=None,
             options=["Home", "Profile", "AI Blog Writer", "Advanced Post Generator", "FB Post Writer", "Instagram Captions", 
-                     "Proofreader", "Critique Post", "Alternative Words", "Change Tone",],
+                     "Proofreader", "Critique Post", "Alternative Words", "Change Tone"],
             icons=["house", "person", "pencil-square", "pencil-square", "facebook", "instagram", 
                    "check-circle", "chat-square-quote", "shuffle", "palette", "light-bulb"],
             menu_icon="cast",
             default_index=0,
             styles={
                 "container": {"padding": "0!important", "background-color": "#d50032"},
-                "icon": {"color": "white", "font-size": "16px"},
+                "icon": {"color": "white", "font-size": "18px"},  # Increased icon size
                 "nav-link": {
-                    "font-size": "16px",
+                    "font-size": "18px",  # Increased font size to match H1
                     "text-align": "left", 
                     "margin": "0px", 
                     "--hover-color": "#1e255d",
                     "color": "white",
                     "padding": "0.75rem 1rem",
+                    "font-weight": "600",  # Made text bold
                 },
                 "nav-link-selected": {"background-color": "#1e255d"},
             }
@@ -368,8 +379,6 @@ def main():
         alternative_words_page()
     elif selected == "Change Tone":
         change_tone_style_page()
-
-
 
 
 def generate_prompt(summary, platform):
