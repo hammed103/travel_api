@@ -131,9 +131,12 @@ class TravelAgentPromotionTool:
             st.error(f"An error occurred: {str(e)}")
             return None
 
+
 def homepage():
     st.title("Welcome to Social Media Companion")
     st.subheader("Your AI-Powered Marketing Partner for Travel Agents")
+    
+
 
     col1, col2 = st.columns(2)
 
@@ -215,7 +218,7 @@ def main():
     st.set_page_config(page_title="InteleTravel Promotion Tool", page_icon="✈️", layout="wide")
     tool = TravelAgentPromotionTool()
 
-    # Custom CSS (Keep your existing CSS here)
+    # Custom CSS (Keep your existing CSS here and add the new styles)
     st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;600&display=swap');
@@ -306,7 +309,8 @@ def main():
 
     .feature-title {
         font-weight: 600;
-        color: #3d4ed7;
+        color: black;
+        font-size: 20px;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -319,7 +323,7 @@ def main():
         selected = option_menu(
             menu_title=None,
             options=["Home", "Profile", "AI Blog Writer", "Advanced Post Generator", "FB Post Writer", "Instagram Captions", 
-                     "Proofreader", "Critique Post", "Alternative Words", "Change Tone",],
+                     "Proofreader", "Critique Post", "Alternative Words", "Change Tone", ],
             icons=["house", "person", "pencil-square", "pencil-square", "facebook", "instagram", 
                    "check-circle", "chat-square-quote", "shuffle", "palette", ],
             menu_icon="cast",
@@ -360,8 +364,8 @@ def main():
         alternative_words_page()
     elif selected == "Change Tone":
         change_tone_style_page()
-    #elif selected == "Prompt Generator":
-    #    prompt_generatorx()
+
+
 
 def generate_prompt(summary, platform):
     # Template for generating the prompt
