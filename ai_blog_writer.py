@@ -84,7 +84,7 @@ class BlogGenerator:
         return '\n'.join(lines).strip()
 
 def ai_blog_writer():
-    st.header("AI BLOG WRITER")
+    st.header("AI Blog Writer")
     st.markdown("Create engaging blog content to promote your travel agency!")
 
     # Initialize session state
