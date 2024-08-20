@@ -16,6 +16,7 @@ from fb_post_writer import fb_post_writer
 from insta_caption import instagram_caption_generator_page
 from advanced_postgenerator import advanced_post_generator
 from prompt_generator import prompt_generator
+from img_caption import prompt_generatorx
 # Setup or get event loop
 def get_or_create_eventloop():
     try:
@@ -130,7 +131,83 @@ class TravelAgentPromotionTool:
             st.error(f"An error occurred: {str(e)}")
             return None
 
+def homepage():
+    st.title("Welcome to Social Media Companion")
+    st.subheader("Your AI-Powered Marketing Partner for Travel Agents")
 
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.markdown("## Why Choose Social Media Companion?")
+        
+        st.markdown("""
+        <div class="feature-card">
+            <p class="feature-title">🌎 Travel Industry Expertise</p>
+            <p>Specialized prompts tailored for travel content. We understand and speak the language of wanderlust.</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.markdown("""
+        <div class="feature-card">
+            <p class="feature-title">🎨 AI-Powered Creativity</p>
+            <p>Generate engaging blog posts, social media content, and Instagram captions with expertly crafted prompts.</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.markdown("""
+        <div class="feature-card">
+            <p class="feature-title">⏱️ Time-Saving Efficiency</p>
+            <p>Streamline your content creation process. Focus on creating unforgettable travel experiences.</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.markdown("""
+        <div class="feature-card">
+            <p class="feature-title">🔒 Privacy First</p>
+            <p>We use models that don't train on your data. Your content and ideas remain uniquely yours.</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with col2:
+        st.markdown("## Key Features")
+        
+        st.markdown("""
+        <div class="feature-card">
+            <p class="feature-title">✍️ AI Blog Writer</p>
+            <p>Create compelling travel blog posts with ease.</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.markdown("""
+        <div class="feature-card">
+            <p class="feature-title">💬 Social Media Enhancer</p>
+            <p>Refine your posts for maximum impact.</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.markdown("""
+        <div class="feature-card">
+            <p class="feature-title">📸 Instagram Caption Generator</p>
+            <p>Craft the perfect captions for your travel photos.</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.markdown("""
+        <div class="feature-card">
+            <p class="feature-title">🔧 Tone Adjustment</p>
+            <p>Tailor your content's voice to your brand and audience.</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.markdown("""
+        <div class="feature-card">
+            <p class="feature-title">🌐 Multi-Platform Support</p>
+            <p>From Facebook to Instagram, we've got you covered.</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    if st.button("Get Started Now"):
+        st.success("Welcome aboard! Let's create some amazing content together.")
 
 
 
@@ -138,7 +215,7 @@ def main():
     st.set_page_config(page_title="InteleTravel Promotion Tool", page_icon="✈️", layout="wide")
     tool = TravelAgentPromotionTool()
 
-    # Custom CSS for InteleTravel theme with taller navbar
+    # Custom CSS (Keep your existing CSS here)
     st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;600&display=swap');
@@ -217,39 +294,55 @@ def main():
     a:hover {
         color: #1e255d;
     }
+
+    /* Additional styles for the new homepage */
+    .feature-card {
+        background-color: white;
+        padding: 1rem;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        margin-bottom: 1rem;
+    }
+
+    .feature-title {
+        font-weight: 600;
+        color: #3d4ed7;
+    }
     </style>
     """, unsafe_allow_html=True)
 
     # Sidebar
     with st.sidebar:
-        st.image("https://info.inteletravel.com/hubfs/InT_StyleGuide_LogoHeader.svg", width=200)  # Replace with actual logo path
-        st.title("InteleTravel ")
+        st.image("https://info.inteletravel.com/hubfs/InT_StyleGuide_LogoHeader.svg", width=200)
+        st.title("InteleTravel")
         
         selected = option_menu(
             menu_title=None,
-            options=["Profile", "AI Blog Writer","Advanced Post Generator", "FB Post Writer", "Instagram Captions", 
-                     "Proofreader", "Critique Post", "Alternative Words", "Change Tone","Prompt Generator"],
-            icons=["person", "pencil-square","pencil-square", "facebook", "instagram", 
-                   "check-circle", "chat-square-quote", "shuffle", "palette","light-bulb"],
+            options=["Home", "Profile", "AI Blog Writer", "Advanced Post Generator", "FB Post Writer", "Instagram Captions", 
+                     "Proofreader", "Critique Post", "Alternative Words", "Change Tone", "Prompt Generator"],
+            icons=["house", "person", "pencil-square", "pencil-square", "facebook", "instagram", 
+                   "check-circle", "chat-square-quote", "shuffle", "palette", "light-bulb"],
             menu_icon="cast",
             default_index=0,
             styles={
                 "container": {"padding": "0!important", "background-color": "#d50032"},
-                "icon": {"color": "white", "font-size": "16px"},  # Slightly larger icon
+                "icon": {"color": "white", "font-size": "16px"},
                 "nav-link": {
-                    "font-size": "16px",  # Slightly larger font
+                    "font-size": "16px",
                     "text-align": "left", 
                     "margin": "0px", 
                     "--hover-color": "#1e255d",
                     "color": "white",
-                    "padding": "0.75rem 1rem",  # Increased padding for taller navbar items
+                    "padding": "0.75rem 1rem",
                 },
                 "nav-link-selected": {"background-color": "#1e255d"},
             }
         )
 
     # Page content based on selection
-    if selected == "Profile":
+    if selected == "Home":
+        homepage()
+    elif selected == "Profile":
         profile_page()
     elif selected == "AI Blog Writer":
         ai_blog_writer()
@@ -267,9 +360,8 @@ def main():
         alternative_words_page()
     elif selected == "Change Tone":
         change_tone_style_page()
-    elif selected == "Prompt Generator" :
-        prompt_generator()
-
+    #elif selected == "Prompt Generator":
+    #    prompt_generatorx()
 
 def generate_prompt(summary, platform):
     # Template for generating the prompt
