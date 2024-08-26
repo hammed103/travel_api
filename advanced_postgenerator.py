@@ -4,19 +4,17 @@ from llamaapi import LlamaAPI
 from st_copy_to_clipboard import st_copy_to_clipboard
 from datetime import date
 
-
 def json_serialize(obj):
     if isinstance(obj, date):
         return obj.isoformat()
     raise TypeError(f"Type {type(obj)} not serializable")
 
-
 class AdvancedPostGenerator:
     def __init__(self):
         self.llama = LlamaAPI("LL-DVfPu5BJU8SqjomBN2KLlmYaWIFELl5fAoegicsufcLpraWJ7PiWK4bPCdIcBAbW")
 
-    def generate_post(self, post_type, fields, language, tone, include_cta, hashtags, length, profile):
-        system_prompt = self._create_system_prompt(profile)
+    def generate_post(self, post_type, fields, language, tone, include_cta, hashtags, length, profile, add_compliance, region):
+        system_prompt = self._create_system_prompt(profile, add_compliance, region)
         user_prompt = f"""
         Task: Generate a social media post for a travel agency.
         Post type: {post_type}
@@ -25,7 +23,7 @@ class AdvancedPostGenerator:
         Tone: {tone}
         {"Include a call-to-action." if include_cta else ""}
         Hashtags: {hashtags}
-        Post length: {length} plus or minus  100 characters
+        Post length: {length} plus or minus 100 characters
 
         Please create a compelling and engaging post based on the above information. The post should be appropriate for the specified post type, use the given details effectively, be written in the specified language and tone, include a call-to-action if requested, incorporate the provided hashtags naturally, and adhere to the specified character length.
         """
@@ -41,9 +39,11 @@ class AdvancedPostGenerator:
 
         return self._make_api_call(api_request_json)
 
-    def _create_system_prompt(self, profile):
-        return f"""You are an AI assistant creating social media content for a travel agent. 
+    def _create_system_prompt(self, profile, add_compliance, region):
+        spelling_preference = profile.get('spelling_preference', 'American English')
+        prompt = f"""You are an AI assistant creating social media content for a travel agent. 
         Generate content directly without any introductory phrases or meta-commentary. 
+        Use {spelling_preference} spelling and vocabulary throughout the content.
         Use the following profile information as context and apply it where relevant:
         
         Name: {profile.get('name', 'the travel agent')}
@@ -59,6 +59,26 @@ class AdvancedPostGenerator:
         Incorporate this information naturally into the content where appropriate.
         """
 
+        if add_compliance:
+            if region == "UK":
+                prompt += """
+                Ensure Compliance: When writing content for travel-related posts in the UK, always include necessary disclaimers and comply with the Advertising Standards Authority (ASA) and Committee of Advertising Practice (CAP) guidelines. Use the following guidelines to maintain compliance:
+                Pricing Statements: If you mention any prices, include phrases such as "Prices may vary," "Subject to availability," or "Additional charges may apply."
+                Offers and Discounts: When discussing offers or discounts, add disclaimers like "Terms and conditions apply" or "Limited time offer."
+                Reviews and Endorsements: If the content includes reviews, endorsements, or sponsored content, clearly state "Sponsored," "Ad," or "This is a paid partnership."
+                Example: "Book now for just £199! Prices may vary. Terms and conditions apply."
+                """
+            elif region == "US":
+                prompt += """
+                Ensure Compliance: When writing content for travel-related posts in the US, adhere to the Federal Trade Commission (FTC) guidelines by including appropriate disclaimers. Use the following guidelines to maintain compliance:
+                Pricing Statements: If prices are mentioned, add disclaimers such as "Prices are subject to change" or "Check for latest offers."
+                Offers and Discounts: For offers or discounts, include phrases like "Terms and conditions apply," "Offer valid while supplies last," or "Limited time offer."
+                Reviews and Endorsements: Clearly disclose sponsored content or endorsements with statements like "Sponsored," "Ad," or "This content is sponsored by [Company Name]."
+                Example: "Special deal for $299! Prices are subject to change. Terms and conditions apply."
+                """
+
+        return prompt
+
     def _make_api_call(self, api_request_json):
         try:
             response = self.llama.run(api_request_json)
@@ -73,7 +93,6 @@ class AdvancedPostGenerator:
         while lines and (not lines[0].strip() or ':' in lines[0]):
             lines.pop(0)
         return '\n'.join(lines).strip()
-    
 
 
 def advanced_post_generator():
@@ -127,21 +146,16 @@ def advanced_post_generator():
 
     # Additional options
     with st.expander("➕ Additional Options", expanded=False):
-        #if post_type == "Destination Highlight":
         fields["Best Time to Visit"] = st.selectbox("Best Time to Visit", ["Spring", "Summer", "Fall", "Winter", "Year-round"])
         fields["Unique Selling Point"] = st.text_input("Unique Selling Point")
-        #elif post_type == "Travel Tip":
         fields["Tip Category"] = st.selectbox("Tip Category", ["Packing Tips", "Safety Tips", "Budget Tips", "Cultural Tips", "Transportation Tips"])
         fields["Relevant Destination(s)"] = st.text_input("Relevant Destination(s)")
-        #elif post_type == "Client Story":
         fields["Travel Date"] = st.date_input("Travel Date")
         fields["Trip Type"] = st.selectbox("Trip Type", ["Family Vacation", "Honeymoon", "Adventure Trip", "Luxury Getaway", "Group Tour"])
         fields["Highlight of the Trip"] = st.text_input("Highlight of the Trip")
-        #elif post_type == "Itinerary Sample":
         fields["Travel Style"] = st.selectbox("Travel Style", ["Luxury", "Budget", "Adventure", "Cultural", "Relaxation"])
         fields["Day-by-Day Highlights"] = st.text_area("Day-by-Day Highlights")
         fields["Estimated Price Range"] = st.text_input("Estimated Price Range")
-        #elif post_type == "Travel Inspiration":
         fields["Theme"] = st.selectbox("Theme", ["Bucket List Destinations", "Hidden Gems", "Seasonal Specials", "Unique Local Experiences", "Foodie Adventures"])
         fields["Featured Destination(s)"] = st.text_input("Featured Destination(s)")
 
@@ -168,10 +182,15 @@ def advanced_post_generator():
         else:
             cta = None
 
+    # Compliance options (moved just above the Generate Post button)
+    st.subheader("Compliance Options")
+    add_compliance = st.checkbox("Add Compliance", value=True)
+    region = st.selectbox("Region for Compliance", ["UK", "US"]) if add_compliance else None
+
     if st.button("Generate Post"):
         with st.spinner("Generating post..."):
             serializable_fields = json.loads(json.dumps(fields, default=json_serialize))
-            post_content = post_generator.generate_post(post_type, serializable_fields, language, tone, cta, hashtags, post_length, profile)
+            post_content = post_generator.generate_post(post_type, serializable_fields, language, tone, cta, hashtags, post_length, profile, add_compliance, region)
         
         if post_content:
             st.session_state.generated_post = post_content
@@ -201,7 +220,7 @@ def advanced_post_generator():
                 with st.spinner("Regenerating your post..."):
                     serializable_fields = json.loads(json.dumps(fields, default=json_serialize))
                     regenerate_prompt = f"Original post type: {post_type}\nOriginal fields: {json.dumps(serializable_fields)}\nPrevious content: {edited_post}\nFeedback: {feedback}\nPlease regenerate the post incorporating the feedback."
-                    regenerated_content = post_generator.generate_post(post_type, {"regenerate_prompt": regenerate_prompt}, language, tone, cta, hashtags, post_length, profile)
+                    regenerated_content = post_generator.generate_post(post_type, {"regenerate_prompt": regenerate_prompt}, language, tone, cta, hashtags, post_length, profile, add_compliance, region)
                     if regenerated_content:
                         st.session_state.generated_post = regenerated_content
                         st.rerun()
@@ -215,9 +234,6 @@ def advanced_post_generator():
         if st.button("Copy Saved Post"):
             st_copy_to_clipboard(st.session_state.saved_post)
             st.success("Saved post copied to clipboard!")
-
-
-
 
 if __name__ == "__main__":
     advanced_post_generator()

@@ -4,14 +4,13 @@ import random
 from st_copy_to_clipboard import st_copy_to_clipboard
 
 
-
 class BioGenerator:
     def __init__(self):
         self.llama = LlamaAPI("LL-DVfPu5BJU8SqjomBN2KLlmYaWIFELl5fAoegicsufcLpraWJ7PiWK4bPCdIcBAbW")
 
-    def generate_bio(self, profile, previous_bio=None, feedback=None):
+    def generate_bio(self, profile, spelling_preference, previous_bio=None, feedback=None):
         system_prompt = "You are an AI assistant creating professional bios for travel agents."
-        user_prompt = self._create_user_prompt(profile, previous_bio, feedback)
+        user_prompt = self._create_user_prompt(profile, spelling_preference, previous_bio, feedback)
 
         api_request_json = {
             "model": "llama-70b-chat",
@@ -30,7 +29,7 @@ class BioGenerator:
             st.error(f"An error occurred: {str(e)}")
             return None
 
-    def _create_user_prompt(self, profile, previous_bio=None, feedback=None):
+    def _create_user_prompt(self, profile, spelling_preference, previous_bio=None, feedback=None):
         prompt = f"""Generate a professional and engaging bio for a travel agent with the following details:
         Name: {profile.get('name', '')}
         Years of Experience: {profile.get('years_experience', '')}
@@ -44,8 +43,9 @@ class BioGenerator:
         Recent Achievement: {profile.get('recent_achievement', '')}
         Personal Travel Goal: {profile.get('personal_travel_goal', '')}
         Additional Information: {profile.get('additional_info', '')}
+        Spelling Preference: {spelling_preference}
 
-        The bio should be approximately 150-200 words long, highlight the agent's expertise, unique qualities, and personal touch. It should be immediately usable without any need for adjustment. Start with "I am" or "As a travel agent, I".
+        The bio should be approximately 150-200 words long, highlight the agent's expertise, unique qualities, and personal touch. It should be immediately usable without any need for adjustment. Start with "I am" or "As a travel agent, I". Use {spelling_preference} spelling and vocabulary throughout the bio.
         """
 
         if previous_bio and feedback:
@@ -69,8 +69,6 @@ class BioGenerator:
         return '\n'.join(lines).strip()
 
 
-
-
 def profile_page():
     st.title("Travel Agent Profile")
 
@@ -90,13 +88,16 @@ def profile_page():
     if st.session_state.get('editing', False):
         edit_profile()
 
+    # Spelling preference
+    spelling_preference = st.radio("Spelling Preference", ["American English", "British English"])
+
     # Bio generation
     bio_generator = BioGenerator()
     
     if 'ai_bio' not in st.session_state:
         if st.button("Generate AI Bio"):
             with st.spinner("Generating bio..."):
-                generated_bio = bio_generator.generate_bio(st.session_state.profile)
+                generated_bio = bio_generator.generate_bio(st.session_state.profile, spelling_preference)
                 if generated_bio:
                     st.session_state.ai_bio = generated_bio
                     st.rerun()
@@ -106,9 +107,7 @@ def profile_page():
         st.markdown(f'<div style="border:1px solid #ddd; padding:10px; border-radius:5px; background-color: #f9f9f9;">{st.session_state.ai_bio}</div>', unsafe_allow_html=True)
         
         if st.button("Copy Bio"):
-            # Render copy to clipboard button
             st_copy_to_clipboard(st.session_state.ai_bio)
-            
         
         if st.button("Set as Profile Bio"):
             st.session_state.profile['bio'] = st.session_state.ai_bio
@@ -117,10 +116,11 @@ def profile_page():
         feedback = st.text_area("How did I do? (Anything you want to add/remove?)", placeholder="E.g., Add more details about my specialties, remove the mention of specific destinations")
         if st.button("Regenerate Bio"):
             with st.spinner("Regenerating bio..."):
-                regenerated_bio = bio_generator.generate_bio(st.session_state.profile, st.session_state.ai_bio, feedback)
+                regenerated_bio = bio_generator.generate_bio(st.session_state.profile, spelling_preference, st.session_state.ai_bio, feedback)
                 if regenerated_bio:
                     st.session_state.ai_bio = regenerated_bio
                     st.rerun()
+
 
 
 
@@ -140,6 +140,7 @@ def generate_random_profile():
         "additional_info": "",
         "bio": ""
     }
+
 
 def display_profile():
     profile = st.session_state.profile

@@ -1,13 +1,13 @@
 import streamlit as st
 from llamaapi import LlamaAPI
-import random
 from st_copy_to_clipboard import st_copy_to_clipboard
+
 class FacebookPostGenerator:
     def __init__(self):
         self.llama = LlamaAPI("LL-DVfPu5BJU8SqjomBN2KLlmYaWIFELl5fAoegicsufcLpraWJ7PiWK4bPCdIcBAbW")
 
-    def generate_fb_post(self, post_info, profile, previous_content=None):
-        system_prompt = self._create_system_prompt(profile)
+    def generate_fb_post(self, post_info, profile, add_compliance, region, previous_content=None):
+        system_prompt = self._create_system_prompt(profile, add_compliance, region)
         user_prompt = self._create_user_prompt(post_info, previous_content)
 
         api_request_json = {
@@ -27,9 +27,11 @@ class FacebookPostGenerator:
             st.error(f"An error occurred: {str(e)}")
             return None
 
-    def _create_system_prompt(self, profile):
-        return f"""You are an AI assistant creating a Facebook post for a travel agent. 
+    def _create_system_prompt(self, profile, add_compliance, region):
+        spelling_preference = profile.get('spelling_preference', 'American English')
+        prompt = f"""You are an AI assistant creating a Facebook post for a travel agent. 
         Write in a concise, engaging style suitable for social media. 
+        Use {spelling_preference} spelling and vocabulary throughout the content.
         Use the following profile information as context and apply it where relevant:
 
         Name: {profile.get('name', 'the travel agent')}
@@ -41,6 +43,26 @@ class FacebookPostGenerator:
 
         Incorporate this information naturally into the post where appropriate.
         """
+
+        if add_compliance:
+            if region == "UK":
+                prompt += """
+                Ensure Compliance: When writing content for travel-related posts in the UK, always include necessary disclaimers and comply with the Advertising Standards Authority (ASA) and Committee of Advertising Practice (CAP) guidelines. Use the following guidelines to maintain compliance:
+                Pricing Statements: If you mention any prices, include phrases such as "Prices may vary," "Subject to availability," or "Additional charges may apply."
+                Offers and Discounts: When discussing offers or discounts, add disclaimers like "Terms and conditions apply" or "Limited time offer."
+                Reviews and Endorsements: If the content includes reviews, endorsements, or sponsored content, clearly state "Sponsored," "Ad," or "This is a paid partnership."
+                Example: "Book now for just £199! Prices may vary. Terms and conditions apply."
+                """
+            elif region == "US":
+                prompt += """
+                Ensure Compliance: When writing content for travel-related posts in the US, adhere to the Federal Trade Commission (FTC) guidelines by including appropriate disclaimers. Use the following guidelines to maintain compliance:
+                Pricing Statements: If prices are mentioned, add disclaimers such as "Prices are subject to change" or "Check for latest offers."
+                Offers and Discounts: For offers or discounts, include phrases like "Terms and conditions apply," "Offer valid while supplies last," or "Limited time offer."
+                Reviews and Endorsements: Clearly disclose sponsored content or endorsements with statements like "Sponsored," "Ad," or "This content is sponsored by [Company Name]."
+                Example: "Special deal for $299! Prices are subject to change. Terms and conditions apply."
+                """
+
+        return prompt
 
     def _create_user_prompt(self, post_info, previous_content=None):
         prompt = f"""Create a Facebook post for a travel agent with the following details:
@@ -146,13 +168,18 @@ def fb_post_writer():
     # Collect post information
     post_info = collect_post_info(profile)
 
+    # Compliance options
+    st.subheader("Compliance Options")
+    add_compliance = st.checkbox("Add Compliance", value=True)
+    region = st.selectbox("Region for Compliance", ["UK", "US"]) if add_compliance else None
+
     # Generate post button
     if st.button("🚀 Generate Facebook Post"):
         if not profile.get('name') or not post_info["target_audience"]:
             st.error("🚫 Please complete your profile and provide a target audience.")
         else:
             with st.spinner("Generating your Facebook post..."):
-                generated_post = post_generator.generate_fb_post(post_info, profile)
+                generated_post = post_generator.generate_fb_post(post_info, profile, add_compliance, region)
             
             if generated_post:
                 st.session_state.current_post = generated_post
@@ -162,7 +189,6 @@ def fb_post_writer():
     # Display generated post and handle regeneration
     if 'current_post' in st.session_state:
         st.subheader("Generated Facebook Post")
-        #st.markdown(f"```{st.session_state.current_post}```")
         
         edited_post = st.text_area("Edit Your Post", value=st.session_state.current_post, height=300)
         
@@ -173,7 +199,7 @@ def fb_post_writer():
         if st.button("Regenerate Post"):
             with st.spinner("Regenerating your Facebook post..."):
                 st.session_state.post_info["feedback"] = feedback
-                regenerated_post = post_generator.generate_fb_post(st.session_state.post_info, profile, st.session_state.current_post)
+                regenerated_post = post_generator.generate_fb_post(st.session_state.post_info, profile, add_compliance, region, st.session_state.current_post)
                 if regenerated_post:
                     st.session_state.current_post = regenerated_post
                     st.rerun()
@@ -181,3 +207,6 @@ def fb_post_writer():
     if 'saved_fb_post' in st.session_state:
         st.header("Your Saved Facebook Post")
         st.write(st.session_state.saved_fb_post)
+
+if __name__ == "__main__":
+    fb_post_writer()

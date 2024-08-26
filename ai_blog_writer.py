@@ -7,14 +7,14 @@ class BlogGenerator:
     def __init__(self):
         self.llama = LlamaAPI("LL-DVfPu5BJU8SqjomBN2KLlmYaWIFELl5fAoegicsufcLpraWJ7PiWK4bPCdIcBAbW")
 
-    def generate_blog(self, input_type, user_input, profile):
+    def generate_blog(self, input_type, user_input, profile, add_compliance, region):
         if input_type == "prompt":
-            return self._generate_from_prompt(user_input, profile)
+            return self._generate_from_prompt(user_input, profile, add_compliance, region)
         elif input_type == "fields":
-            return self._generate_from_fields(user_input, profile)
+            return self._generate_from_fields(user_input, profile, add_compliance, region)
 
-    def _generate_from_prompt(self, prompt, profile):
-        system_prompt = self._create_system_prompt(profile)
+    def _generate_from_prompt(self, prompt, profile, add_compliance, region):
+        system_prompt = self._create_system_prompt(profile, add_compliance, region)
         
         api_request_json = {
             "model": "llama-70b-chat",
@@ -27,8 +27,8 @@ class BlogGenerator:
         
         return self._make_api_call(api_request_json)
 
-    def _generate_from_fields(self, fields, profile):
-        system_prompt = self._create_system_prompt(profile)
+    def _generate_from_fields(self, fields, profile, add_compliance, region):
+        system_prompt = self._create_system_prompt(profile, add_compliance, region)
         
         user_prompt = f"""Generate a {fields['content_type']} blog article for a travel agent.
         Tone: {fields['tone']}
@@ -49,10 +49,12 @@ class BlogGenerator:
         
         return self._make_api_call(api_request_json)
 
-    def _create_system_prompt(self, profile):
-        return f"""You are an AI assistant creating blog content for a travel agent. 
+    def _create_system_prompt(self, profile, add_compliance, region):
+        spelling_preference = profile.get('spelling_preference', 'American English')
+        prompt = f"""You are an AI assistant creating blog content for a travel agent. 
         Generate content directly without any introductory phrases or meta-commentary. 
         Write in the first-person perspective of the travel agent.
+        Use {spelling_preference} spelling and vocabulary throughout the content.
         Use the following profile information as context and apply it where relevant:
         
         Name: {profile.get('name', 'the travel agent')}
@@ -67,6 +69,26 @@ class BlogGenerator:
         
         Incorporate this information naturally into the blog content where appropriate.
         """
+
+        if add_compliance:
+            if region == "UK":
+                prompt += """
+                Ensure Compliance: When writing content for travel-related posts in the UK, always include necessary disclaimers and comply with the Advertising Standards Authority (ASA) and Committee of Advertising Practice (CAP) guidelines. Use the following guidelines to maintain compliance:
+                Pricing Statements: If you mention any prices, include phrases such as "Prices may vary," "Subject to availability," or "Additional charges may apply."
+                Offers and Discounts: When discussing offers or discounts, add disclaimers like "Terms and conditions apply" or "Limited time offer."
+                Reviews and Endorsements: If the content includes reviews, endorsements, or sponsored content, clearly state "Sponsored," "Ad," or "This is a paid partnership."
+                Example: "Book now for just £199! Prices may vary. Terms and conditions apply."
+                """
+            elif region == "US":
+                prompt += """
+                Ensure Compliance: When writing content for travel-related posts in the US, adhere to the Federal Trade Commission (FTC) guidelines by including appropriate disclaimers. Use the following guidelines to maintain compliance:
+                Pricing Statements: If prices are mentioned, add disclaimers such as "Prices are subject to change" or "Check for latest offers."
+                Offers and Discounts: For offers or discounts, include phrases like "Terms and conditions apply," "Offer valid while supplies last," or "Limited time offer."
+                Reviews and Endorsements: Clearly disclose sponsored content or endorsements with statements like "Sponsored," "Ad," or "This content is sponsored by [Company Name]."
+                Example: "Special deal for $299! Prices are subject to change. Terms and conditions apply."
+                """
+
+        return prompt
 
     def _make_api_call(self, api_request_json):
         try:
@@ -101,10 +123,14 @@ def ai_blog_writer():
     # Method selection
     st.session_state.generation_method = st.radio("Choose generation method:", ("Prompt", "Fields"))
 
+    # Compliance options
+    add_compliance = st.checkbox("Add Compliance", value=True)
+    region = st.selectbox("Region for Compliance", ["UK", "US"]) if add_compliance else None
+
     if st.session_state.generation_method == "Prompt":
-        prompt_input()
+        prompt_input(blog_generator, profile, add_compliance, region)
     else:
-        fields_input()
+        fields_input(blog_generator, profile, add_compliance, region)
 
     # Display and edit generated content
     if st.session_state.blog_content:
@@ -112,9 +138,9 @@ def ai_blog_writer():
 
     # Regeneration and feedback
     if st.session_state.blog_content:
-        regenerate_content(blog_generator, profile)
+        regenerate_content(blog_generator, profile, add_compliance, region)
 
-def prompt_input():
+def prompt_input(blog_generator, profile, add_compliance, region):
     user_prompt = st.text_area(
         "Describe what you want to create",
         value=st.session_state.get('user_prompt', ''),
@@ -126,9 +152,7 @@ def prompt_input():
     if st.button("Generate from Prompt"):
         if user_prompt:
             with st.spinner("Generating your blog content..."):
-                blog_generator = BlogGenerator()
-                profile = st.session_state.get('profile', {})
-                generated_content = blog_generator.generate_blog("prompt", user_prompt, profile)
+                generated_content = blog_generator.generate_blog("prompt", user_prompt, profile, add_compliance, region)
                 if generated_content:
                     st.session_state.blog_content = generated_content
                     st.session_state.edited_content = generated_content
@@ -136,7 +160,7 @@ def prompt_input():
         else:
             st.warning("Please provide a prompt before generating.")
 
-def fields_input():
+def fields_input(blog_generator, profile, add_compliance, region):
     col1, col2 = st.columns(2)
     with col1:
         content_type_options = ["Destination Guide", "Travel Tips", "Itinerary", "Travel Story", "Hotel Review", "Local Cuisine", "Cultural Insights", "Adventure Activity", "Travel News", "Promotional Offer", "Custom"]
@@ -153,14 +177,14 @@ def fields_input():
             content_tone = st.text_input("Custom Tone", key="custom_tone")
 
     with col2:
-        target_audience = st.text_input("Target Audience", value=st.session_state.get('profile', {}).get('client_focus', ''), key="target_audience")
-        content_focus = st.text_input("Content Focus", value=st.session_state.get('profile', {}).get('travel_style', ''), key="content_focus")
+        target_audience = st.text_input("Target Audience", value=profile.get('client_focus', ''), key="target_audience")
+        content_focus = st.text_input("Content Focus", value=profile.get('travel_style', ''), key="content_focus")
         content_language = st.selectbox("Content Language", options=["English", "Spanish", "French", "German", "Italian", "Chinese", "Japanese", "Arabic", "Russian", "Portuguese", "Customize"], key="content_language")
         if content_language == "Customize":
             content_language = st.text_input("Custom Language", key="custom_language")
 
     if st.button("Generate Blog Content"):
-        if not st.session_state.get('profile', {}).get('name') or not target_audience:
+        if not profile.get('name') or not target_audience:
             st.error("🚫 Please complete your profile and provide a target audience.")
         else:
             with st.spinner("Generating your blog content..."):
@@ -172,9 +196,7 @@ def fields_input():
                     "target_audience": target_audience,
                     "language": content_language
                 }
-                blog_generator = BlogGenerator()
-                profile = st.session_state.get('profile', {})
-                generated_content = blog_generator.generate_blog("fields", fields, profile)
+                generated_content = blog_generator.generate_blog("fields", fields, profile, add_compliance, region)
                 if generated_content:
                     st.session_state.blog_content = generated_content
                     st.session_state.edited_content = generated_content
@@ -202,7 +224,7 @@ def display_edit_content():
             st_copy_to_clipboard(st.session_state.saved_content)
             st.success("Saved content copied to clipboard!")
 
-def regenerate_content(blog_generator, profile):
+def regenerate_content(blog_generator, profile, add_compliance, region):
     st.subheader("Regenerate Content")
     feedback = st.text_area("How can I improve the content? (Anything you want to add/remove?)", 
                             value=st.session_state.get('feedback', ''),
@@ -214,7 +236,7 @@ def regenerate_content(blog_generator, profile):
             with st.spinner("Regenerating your blog content..."):
                 if st.session_state.generation_method == "Prompt":
                     regenerate_prompt = f"Original prompt: {st.session_state.user_prompt}\n\nPrevious content: {st.session_state.edited_content}\n\nFeedback: {feedback}\n\nPlease regenerate the blog content incorporating the feedback."
-                    regenerated_content = blog_generator.generate_blog("prompt", regenerate_prompt, profile)
+                    regenerated_content = blog_generator.generate_blog("prompt", regenerate_prompt, profile, add_compliance, region)
                 else:
                     fields = {
                         "content_type": st.session_state.content_type,
@@ -225,7 +247,7 @@ def regenerate_content(blog_generator, profile):
                         "language": st.session_state.content_language
                     }
                     regenerate_prompt = f"Original fields: {json.dumps(fields)}\n\nPrevious content: {st.session_state.edited_content}\n\nFeedback: {feedback}\n\nPlease regenerate the blog content incorporating the feedback."
-                    regenerated_content = blog_generator.generate_blog("prompt", regenerate_prompt, profile)
+                    regenerated_content = blog_generator.generate_blog("prompt", regenerate_prompt, profile, add_compliance, region)
                 
                 if regenerated_content:
                     st.session_state.blog_content = regenerated_content
