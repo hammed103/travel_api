@@ -113,7 +113,7 @@ def ai_blog_writer():
     if 'blog_content' not in st.session_state:
         st.session_state.blog_content = ""
     if 'generation_method' not in st.session_state:
-        st.session_state.generation_method = "fields"
+        st.session_state.generation_method = "Fields"
 
     # Get profile data
     profile = st.session_state.get('profile', {})
