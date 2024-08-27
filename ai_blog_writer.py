@@ -121,7 +121,7 @@ def ai_blog_writer():
     blog_generator = BlogGenerator()
 
     # Method selection
-    st.session_state.generation_method = st.radio("Choose generation method:", ("Prompt", "Fields"))
+    st.session_state.generation_method = st.radio("Choose generation method:", ("Fields", "Prompt"), index=0)
 
     # Compliance options
     add_compliance = st.checkbox("Add Compliance", value=True)
